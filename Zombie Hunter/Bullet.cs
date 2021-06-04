@@ -19,6 +19,7 @@ namespace Zombie_Hunter
         private PictureBox bullet = new PictureBox();
         private Timer bulletTimer = new Timer();
 
+        // method for creating the bullet
         public void MakeBullet(Form form)
         {
             bullet.BackColor = Color.White;

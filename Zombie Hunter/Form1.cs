@@ -17,7 +17,7 @@ namespace Zombie_Hunter
         int playerHealth = 100;
         int speed = 10;
         int ammo = 10;
-        int zombieSpeed = 3;
+        int zombieSpeed = 2;
         Random randNum = new Random();
         int score;
         List<PictureBox> zombiesList = new List<PictureBox>();
@@ -65,8 +65,12 @@ namespace Zombie_Hunter
 
             foreach (Control x in this.Controls)
             {
+                // checks if the player colides with an ammo box
                 if (x is PictureBox && (string)x.Tag == "ammo")
                 {
+                    // if the player has colided with an ammo box
+                    // increase the overall ammo by 5.
+                    // ammo only spawns when the player has 0 ammo left.
                     if (player.Bounds.IntersectsWith(x.Bounds))
                     {
                         this.Controls.Remove(x);
@@ -75,9 +79,11 @@ namespace Zombie_Hunter
                     }
                 }
 
+                // checks if the player colides with a zombie
                 if (x is PictureBox && (string)x.Tag == "zombie")
                 {
-
+                    // if the player has colided with a zombie
+                    // decrease the health of the player, by 1.
                     if (player.Bounds.IntersectsWith(x.Bounds))
                     {
                         playerHealth -= 1;
@@ -108,6 +114,7 @@ namespace Zombie_Hunter
                     }
                 }
 
+                // this checks if the bullet has colided with any of the zombies.
                 foreach (Control j in this.Controls)
                 {
                     if (j is PictureBox && (string)j.Tag == "bullet" && x is PictureBox && (string)x.Tag == "zombie")
@@ -137,6 +144,7 @@ namespace Zombie_Hunter
                 return;
             }
 
+            // player image is rotated to the left
             if (e.KeyCode == Keys.Left)
             {
                 goLeft = true;
@@ -144,6 +152,7 @@ namespace Zombie_Hunter
                 player.Image = Properties.Resources.left;
             }
 
+            // player image is rotated to the right
             if (e.KeyCode == Keys.Right)
             {
                 goRight = true;
@@ -151,6 +160,7 @@ namespace Zombie_Hunter
                 player.Image = Properties.Resources.right;
             }
 
+            // player image is rotated to the top
             if (e.KeyCode == Keys.Up)
             {
                 goUp = true;
@@ -158,6 +168,7 @@ namespace Zombie_Hunter
                 player.Image = Properties.Resources.up;
             }
 
+            // player image is rotated to the bottom
             if (e.KeyCode == Keys.Down)
             {
                 goDown = true;
@@ -189,11 +200,16 @@ namespace Zombie_Hunter
                 goDown = false;
             }
 
+
             if (e.KeyCode == Keys.Space && ammo > 0 && gameOver == false)
             {
                 ammo--;
+                // calls a function that fires the bullet in which
+                // direction the player is turned.
                 ShootBullet(facing);
 
+                // checks if the ammo is less than 1, or 0
+                // and calls a function that randomly drops ammo on the field.
                 if (ammo < 1)
                 {
                     DropAmmo();
@@ -206,6 +222,8 @@ namespace Zombie_Hunter
             }
         }
 
+        // method for the trajectory of the bullet,
+        // gets a direction as a parameter
         private void ShootBullet(string direction)
         {
             Bullet shootBullet = new Bullet();
@@ -215,6 +233,7 @@ namespace Zombie_Hunter
             shootBullet.MakeBullet(this);
         }
 
+        // method for spawning zombies
         private void MakeZombies()
         {
             PictureBox zombie = new PictureBox();
@@ -228,6 +247,7 @@ namespace Zombie_Hunter
             player.BringToFront();
         }
 
+        // method for spawning ammo crates
         private void DropAmmo()
         {
             PictureBox ammo = new PictureBox();
@@ -241,6 +261,7 @@ namespace Zombie_Hunter
             ammo.BringToFront();
             player.BringToFront();
         }
+
 
         private void RestartGame()
         {
