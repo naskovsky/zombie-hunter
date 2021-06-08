@@ -102,4 +102,4 @@ if (score >= 25)
 }
 ```
 
-Windows Forms Project by: Kiril Naskovski 181222
+Windows Forms Project by: Kiril Naskovski
