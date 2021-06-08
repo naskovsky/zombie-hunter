@@ -18,15 +18,41 @@ namespace Zombie_Hunter
         int speed = 10;
         int ammo = 10;
         int zombieSpeed = 2;
+        int hpdropped = 0;
         Random randNum = new Random();
         int score;
         List<PictureBox> zombiesList = new List<PictureBox>();
+        Timer timer;
 
 
         public Form1()
         {
             InitializeComponent();
+            InitTimer();
             RestartGame();
+        }
+
+        // timer method for hp crates
+        public void InitTimer()
+        {
+            timer = new Timer();
+            timer.Tick += new EventHandler(timer1_Tick);
+            timer.Interval = 10000; // in miliseconds
+            timer.Start();
+        }
+
+        // timer ticker for hp crates
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            // if the players health is lower or equal to 80 hp, a crate is dropped every 10 seconds,
+            // also if there are more than 3 hp crates on the field at the same time the condition will be false
+            // and there wouldn't be another crate dropped, unless the player collects one, and the overall number of hp
+            // crates is 2, then the timer starts again and a hp crate is dropped
+            if (playerHealth <= 80 && hpdropped < 3)
+            {
+                DropHealthPoints();
+                hpdropped += 1;
+            }
         }
 
         private void MainTimerEvent(object sender, EventArgs e)
@@ -41,6 +67,12 @@ namespace Zombie_Hunter
                 player.Image = Properties.Resources.dead;
                 GameTimer.Stop();
                 MessageBox.Show("GAME OVER! \nPRESS ENTER TO START AGAIN!");
+            }
+
+            // if the score reaches 25, the speed of the zombies increase by 1
+            if (score >= 25)
+            {
+                zombieSpeed = 3;
             }
 
             txtAmmo.Text = "Ammo: " + ammo;
@@ -65,7 +97,7 @@ namespace Zombie_Hunter
 
             foreach (Control x in this.Controls)
             {
-                // checks if the player colides with an ammo box
+                // checks if the player walks over an ammo box
                 if (x is PictureBox && (string)x.Tag == "ammo")
                 {
                     // if the player has colided with an ammo box
@@ -75,7 +107,44 @@ namespace Zombie_Hunter
                     {
                         this.Controls.Remove(x);
                         ((PictureBox)x).Dispose();
-                        ammo += 5; //43:52
+                        ammo += 5;
+                    }
+                }
+
+                // checks if player walks over an hp crate
+                if (x is PictureBox && (string)x.Tag == "hp")
+                {
+                    if (player.Bounds.IntersectsWith(x.Bounds))
+                    {
+                        this.Controls.Remove(x);
+                        ((PictureBox)x).Dispose();
+
+                        // if the player has 100 and walks over an hp crate
+                        // it shouldn't add to his health
+                        if (playerHealth == 100)
+                        {
+                            playerHealth = playerHealth + 0;
+                        }
+
+                        // if the player has over 90 health and walks over an hp crate
+                        // it should only give him the ammount left when subtracting the max hp allowed
+                        // and his current hp, so 100 - playerHealth
+                        else if (playerHealth > 90)
+                        {
+                            int remaining = 100 - playerHealth;
+                            playerHealth += remaining;
+                        }
+
+                        // if the player has 90 or less health it should add 10 hp to his current hp
+                        else
+                        {
+                            playerHealth += 10;
+                        }
+
+                        // every time the player walks over and collects the hp crate the
+                        // counter for hp crates dropped, is decrementing by 1,
+                        // this helps the conditional state that tracks if there are more than 3 crates on the field
+                        hpdropped -= 1;
                     }
                 }
 
@@ -214,6 +283,7 @@ namespace Zombie_Hunter
                 {
                     DropAmmo();
                 }
+
             }
 
             if (e.KeyCode == Keys.Enter && gameOver == true)
@@ -263,6 +333,21 @@ namespace Zombie_Hunter
         }
 
 
+        // method for spawning hp crates  
+        private void DropHealthPoints()
+        {
+            PictureBox hp = new PictureBox();
+            hp.Image = Properties.Resources.hp;
+            hp.SizeMode = PictureBoxSizeMode.AutoSize;
+            hp.Left = randNum.Next(10, this.ClientSize.Width - hp.Width);
+            hp.Top = randNum.Next(60, this.ClientSize.Height - hp.Height);
+            hp.Tag = "hp";
+            this.Controls.Add(hp);
+
+            hp.BringToFront();
+            player.BringToFront();
+        }
+
         private void RestartGame()
         {
             player.Image = Properties.Resources.up;
@@ -275,7 +360,6 @@ namespace Zombie_Hunter
             for (int i = 0; i < 3; i++)
             {
                 MakeZombies();
-
             }
 
             goUp = false;
@@ -287,6 +371,7 @@ namespace Zombie_Hunter
             playerHealth = 100;
             score = 0;
             ammo = 10;
+            zombieSpeed = 2;
 
             GameTimer.Start();
         }
